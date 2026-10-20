@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kombat FLOW</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0b0f19;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* HUD de Kombat FLOW */
+        #ui {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .title-box {
+            background: rgba(15, 23, 42, 0.85);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: #38bdf8;
+            text-transform: uppercase;
+        }
+        .stats {
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div class="title-box">
+            <h1>Kombat FLOW</h1>
+            <div class="stats">SCORE: <span id="score">0</span></div>
+        </div>
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log('PWA registrado'))
+                .catch(err => console.log('Error SW:', err));
+        }
+
+        // Escena Kombat FLOW
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b0f19);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.body.appendChild(renderer.domElement);
+
+        // Suelo estilo Grid / Arena
+        const floorGeometry = new THREE.PlaneGeometry(30, 30, 20, 20);
+        const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        // Luchador / Personaje base
+        const heroGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+        const heroMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
+        const hero = new THREE.Mesh(heroGeo, heroMat);
+        hero.position.y = 0.6;
+        scene.add(hero);
+
+        camera.position.set(0, 8, 12);
+        camera.lookAt(0, 0, 0);
+
+        // Loop de animación
+        function animate() {
+            requestAnimationFrame(animate);
+            hero.rotation.y += 0.015;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive para pantallas móviles
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
